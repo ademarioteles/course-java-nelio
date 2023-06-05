@@ -1,6 +1,7 @@
 package chess;
 
 import boardgame.Board;
+
 public class King extends ChessPiece {
 
     public King(Board board, Color color) {
@@ -11,6 +12,12 @@ public class King extends ChessPiece {
     public String toString() {
         return "♔";
     }
-    
-    
+
+    @Override
+    public boolean[][] possibleMoves() {
+
+        boolean[][] mat = new boolean[getBoard().getRows()][getBoard().getColums()];
+        return mat;
+    }
+
 }

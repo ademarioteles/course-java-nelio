@@ -1,7 +1,7 @@
 package boardgame;
 
-public class Piece {
-    //Classe para as pecas do tabuleiro
+public abstract class Piece {
+    // Classe para as pecas do tabuleiro
     protected Position position;
     private Board board;
 
@@ -12,6 +12,24 @@ public class Piece {
 
     protected Board getBoard() {
         return board;
+    }
+
+    public abstract boolean[][] possibleMoves();
+
+    public boolean possibleMove(Position position){
+        return possibleMoves()[position.getRow()][position.getColoumn()];
+    }
+
+    public boolean isTheAnyPossibleMove(){
+        boolean[][] mat = possibleMoves();
+        for(int i = 0; i < mat.length; i++){
+            for(int j = 0; j < mat.length; j++){
+                if(mat[i][j]){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
