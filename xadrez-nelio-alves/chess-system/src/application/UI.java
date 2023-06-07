@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import javax.management.RuntimeErrorException;
 
+import chess.ChessMatch;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import chess.Color;
@@ -64,6 +65,13 @@ public class UI {
             System.out.println();
         }
         System.out.println("  a b c d e f g h");
+    }
+
+    public static void printMatch(ChessMatch chessMatch){
+        printBoard(chessMatch.getPieces());
+        System.out.println();
+        System.out.println("Turno:" + chessMatch.getTurn());
+        System.out.println("Espere o adversario:" + chessMatch.getCurrentPlayer());
     }
 
     public static void printPiece(ChessPiece piece, boolean background) {
