@@ -17,6 +17,7 @@ public class ChessMatch {
     private List<Piece> piecesOnTheBoard = new ArrayList<>();
     private List<Piece> capturedPieces = new ArrayList<>();
     private boolean check;
+    private boolean checkMate;
 
     public ChessMatch() {
         board = new Board(8, 8);
@@ -43,8 +44,12 @@ public class ChessMatch {
         return currentPlayer;
     }
 
-    public boolean getCheck(){
+    public boolean getCheck() {
         return check;
+    }
+
+    public boolean getCheckMate() {
+        return checkMate;
     }
 
     public boolean[][] possibleMoves(ChessPosition sourcePosition) {
@@ -60,27 +65,32 @@ public class ChessMatch {
         validateTargetPosition(source, target);
         Piece capturePiece = makeMove(source, target);
 
-        if(testCheck(currentPlayer)){
+        if (testCheck(currentPlayer)) {
             undMove(source, target, capturePiece);
             throw new ChessException("Você não pode se colocar em Check.");
         }
-       check = (testCheck(opponent(currentPlayer))) ? true : false;
+        check = (testCheck(opponent(currentPlayer))) ? true : false;
+        if(testCheckMate(opponent(currentPlayer))){
+            checkMate = true;
+        }
         nextTurn();
         return (ChessPiece) capturePiece;
     }
 
-    private Color opponent(Color color){
+    private Color opponent(Color color) {
         return (color == Color.WHITE) ? Color.BLACK : Color.WHITE;
 
     }
-    private ChessPiece King(Color color){
-        List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == color).collect(Collectors.toList());
-        for(Piece p: list){
-            if(p instanceof King){
-                return (ChessPiece)p;
+
+    private ChessPiece King(Color color) {
+        List<Piece> list = piecesOnTheBoard.stream().filter(x -> ((ChessPiece) x).getColor() == color)
+                .collect(Collectors.toList());
+        for (Piece p : list) {
+            if (p instanceof King) {
+                return (ChessPiece) p;
             }
         }
-        throw new IllegalStateException("Não existe o Rei da cor " + color +" no tabuleiro");
+        throw new IllegalStateException("Não existe o Rei da cor " + color + " no tabuleiro");
 
     }
 
@@ -137,16 +147,45 @@ public class ChessMatch {
 
         }
     }
-    private boolean testCheck(Color color){
+
+    private boolean testCheck(Color color) {
         Position kingPosition = King(color).getChessPosition().toPosition();
-        List<Piece> opponentPieces = piecesOnTheBoard.stream().filter(x -> ((ChessPiece)x).getColor() == opponent(color)).collect(Collectors.toList());
-        for(Piece p: opponentPieces){
+        List<Piece> opponentPieces = piecesOnTheBoard.stream()
+                .filter(x -> ((ChessPiece) x).getColor() == opponent(color)).collect(Collectors.toList());
+        for (Piece p : opponentPieces) {
             boolean[][] mat = p.possibleMoves();
-            if(mat[kingPosition.getRow()][kingPosition.getColoumn()]){
+            if (mat[kingPosition.getRow()][kingPosition.getColoumn()]) {
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean testCheckMate(Color color) {
+        if(!testCheck(color)){
+            return false;
+        }
+        List<Piece> list = piecesOnTheBoard.stream()
+        .filter(x -> ((ChessPiece) x).getColor() == opponent(color)).collect(Collectors.toList());
+        for(Piece p : list){
+            boolean[][] mat =  p.possibleMoves();
+            for(int i = 0; i < board.getRows();i++){
+                for(int j = 0; j<board.getColums(); j++){
+                    if(mat[i][j]){
+                        Position source = ((ChessPiece)p).getChessPosition().toPosition();
+                        Position target = new Position(i, j);
+                        Piece capturedPiece = makeMove(source, target);
+                        boolean testCheck = testCheck(color);
+                        undMove(source, target, capturedPiece);
+                        if(!testCheck){
+                            return false;
+                        }
+                    }
+                }
+            }
+
+        }
+        return true;
     }
 
     private void initialSetup() {
